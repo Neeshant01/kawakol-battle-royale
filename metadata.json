@@ -1,0 +1,5 @@
+{
+  "name": "Kawakol Battle Royale",
+  "description": "A real-time multiplayer Battle Royale game set in a stylized version of Kawakol, Bihar. Drop in, loot, and survive!",
+  "requestFramePermissions": ["microphone"]
+}
