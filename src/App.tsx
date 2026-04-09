@@ -481,7 +481,7 @@ export default function App() {
   const isUltraCompactLandscape = viewport.width > viewport.height && viewport.height <= 430;
   const isSmallViewport = Math.min(viewport.width, viewport.height) <= 640;
   const showMovementGrid = !isCompactLandscape;
-  const minimapSize = isUltraCompactLandscape ? 128 : isCompactLandscape ? 144 : isSmallViewport ? 190 : 220;
+  const minimapSize = isUltraCompactLandscape ? 110 : isCompactLandscape ? 124 : isSmallViewport ? 176 : 220;
   const activeWeaponState = weaponSlots[activeWeaponSlot];
   const activeWeaponStats = activeWeaponState.type ? WEAPON_CATALOG[activeWeaponState.type] : null;
   const otherWeaponSlot: WeaponSlotKey = activeWeaponSlot === 'primary' ? 'secondary' : 'primary';
@@ -1207,7 +1207,7 @@ export default function App() {
 
       {gameState === 'playing' && mapSystem && (
         <>
-          <div data-touch-control="true" className={`absolute z-30 flex flex-col ${isCompactLandscape ? 'top-3 left-3 gap-2 max-w-[44vw]' : 'top-5 left-5 gap-3'}`}>
+          <div data-touch-control="true" className="hidden">
             <div className={`hidden rounded-2xl border border-white/10 bg-[#10171A]/82 backdrop-blur-md ${isCompactLandscape ? 'px-3 py-2' : 'px-4 py-3'}`}>
               <div className="text-[10px] uppercase tracking-[0.28em] text-white/45">Current Callout</div>
               <div className={`${isCompactLandscape ? 'text-base' : 'text-xl'} font-black text-[#F2E3B5] leading-tight`}>{currentLocation}</div>
@@ -1238,9 +1238,29 @@ export default function App() {
               Exit To Lobby
             </button>
           </div>
+          <div data-touch-control="true" className={`absolute z-30 ${isCompactLandscape ? 'top-3 left-3' : 'top-5 left-5'}`}>
+            <button
+              type="button"
+              aria-label="Exit to lobby"
+              onClick={handleExitToLobby}
+              className={`rounded-2xl border border-white/10 bg-[#10171A]/88 uppercase tracking-[0.22em] font-bold ${isCompactLandscape ? 'px-3 py-2 text-[10px]' : 'px-4 py-3 text-xs'}`}
+            >
+              Exit
+            </button>
+          </div>
 
           <div data-touch-control="true" className={`absolute z-30 flex flex-col items-end ${isCompactLandscape ? 'top-3 right-3 gap-2' : 'top-5 right-5 gap-3'}`}>
-            <MiniMap mapSystem={mapSystem} playerPos={playerPos} playerRot={playerRot} zone={zone} pins={pins} threats={nearbyThreats} size={minimapSize} />
+            <button
+              type="button"
+              aria-label="Open tactical map"
+              onClick={() => {
+                audioRef.current?.play('click');
+                setShowFullMap(true);
+              }}
+              className="rounded-[1.4rem] overflow-hidden border border-white/12 bg-[#10171A]/88"
+            >
+              <MiniMap mapSystem={mapSystem} playerPos={playerPos} playerRot={playerRot} zone={zone} pins={pins} threats={nearbyThreats} size={minimapSize} />
+            </button>
             <button
               type="button"
               aria-label="Open full tactical map"
@@ -1248,7 +1268,7 @@ export default function App() {
                 audioRef.current?.play('click');
                 setShowFullMap(true);
               }}
-              className={`rounded-2xl border border-white/10 bg-[#10171A]/88 flex items-center gap-2 uppercase tracking-[0.22em] text-xs font-bold ${
+              className={`hidden rounded-2xl border border-white/10 bg-[#10171A]/88 flex items-center gap-2 uppercase tracking-[0.22em] text-xs font-bold ${
                 isCompactLandscape ? 'px-3 py-2' : 'px-4 py-3'
               }`}
             >
@@ -1257,7 +1277,7 @@ export default function App() {
             </button>
           </div>
 
-          <div data-touch-control="true" className={`absolute z-30 ${isCompactLandscape ? 'bottom-3 left-1/2 -translate-x-1/2 w-[min(40vw,264px)]' : 'bottom-8 left-1/2 -translate-x-1/2 w-[min(92vw,560px)]'}`}>
+          <div data-touch-control="true" className="hidden">
             <div className={`rounded-[1.6rem] border border-white/10 bg-[#0D1316]/85 backdrop-blur-md ${isCompactLandscape ? 'px-3 py-3' : 'px-5 py-4'}`}>
               {nearbyLoot ? (
                 <div className={`mb-3 rounded-2xl border border-[#D0BE8F]/22 bg-[#1A1A12]/78 ${isCompactLandscape ? 'px-3 py-2' : 'px-4 py-3'}`}>
@@ -1423,6 +1443,19 @@ export default function App() {
             >
               Low
             </button>
+            <button
+              type="button"
+              aria-label="Open bag"
+              onClick={() => {
+                audioRef.current?.play('click');
+                setShowBackpack(true);
+              }}
+              className={`rounded-full bg-white/10 border border-white/14 flex items-center justify-center ${
+                isUltraCompactLandscape ? 'w-9 h-9' : isCompactLandscape ? 'w-11 h-11' : 'w-14 h-14'
+              }`}
+            >
+              <Shield size={isUltraCompactLandscape ? 13 : isCompactLandscape ? 15 : 20} />
+            </button>
             {nearbyLoot ? (
               <button
                 type="button"
@@ -1467,7 +1500,7 @@ export default function App() {
               <div className={`flex flex-col ${isCompactLandscape ? 'gap-2' : 'gap-3'}`}>
                 <button
                   type="button"
-                  aria-label={sprintLocked ? 'Disable sprint lock' : 'Enable sprint lock'}
+                  aria-label={sprintLocked ? 'Disable run lock' : 'Enable run lock'}
                   aria-pressed={sprintLocked}
                   onClick={() => {
                     setSprintState(!sprintLocked);
@@ -1478,7 +1511,7 @@ export default function App() {
                   } ${sprintLocked ? 'border-[#D0BE8F]/38 bg-[#241E12]/86 text-[#F2E3B5]' : 'border-white/10 bg-[#10171A]/88 text-white/78'}`}
                 >
                   <Zap size={isCompactLandscape ? 12 : 14} />
-                  Fast
+                  Run
                 </button>
 
                 {showMovementGrid ? (
@@ -1605,6 +1638,56 @@ export default function App() {
             </div>
             <div className={`grid flex-1 gap-4 overflow-y-auto ${isCompactLandscape ? 'pb-2' : 'md:grid-cols-[1.1fr_0.9fr]'}`}>
               <div className="rounded-[1.5rem] border border-white/10 bg-black/16 p-4">
+                <div className="text-[10px] uppercase tracking-[0.28em] text-white/45">Combat Status</div>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <InventoryCard title="Primary" value={activeWeaponStats?.label ?? 'Unarmed'} meta={activeWeaponState.type ? `${activeWeaponState.mag}/${activeWeaponState.reserve}` : '--/--'} />
+                  <InventoryCard title="Health" value={`${health}`} meta={`Alive ${playerCount} / Kills ${kills}`} />
+                  <InventoryCard title="Zone" value={`Phase ${zonePhase.phase}`} meta={`${zoneWarning}`} />
+                  <InventoryCard title="Medical" value={`Medkits x${medkits}`} meta={spawnProtectionRemaining > 0 ? `Shield ${spawnProtectionRemaining}s` : `${nearbyThreats.length} threats nearby`} />
+                </div>
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    aria-label="Reload current weapon"
+                    disabled={!canReload}
+                    onClick={handleReload}
+                    className={`rounded-2xl border px-3 py-3 text-[10px] font-black uppercase tracking-[0.22em] ${
+                      canReload
+                        ? 'border-white/10 bg-white/4 text-white hover:bg-white/8'
+                        : 'border-white/6 bg-white/[0.03] text-white/28 cursor-not-allowed'
+                    }`}
+                  >
+                    {isReloading ? 'Reloading' : 'Reload'}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Swap to other weapon slot"
+                    disabled={!canSwap}
+                    onClick={handleSwapWeapon}
+                    className={`rounded-2xl border px-3 py-3 text-[10px] font-black uppercase tracking-[0.22em] ${
+                      canSwap
+                        ? 'border-white/10 bg-white/4 text-white hover:bg-white/8'
+                        : 'border-white/6 bg-white/[0.03] text-white/28 cursor-not-allowed'
+                    }`}
+                  >
+                    Swap
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Use medkit"
+                    disabled={!canHeal}
+                    onClick={handleUseMedkit}
+                    className={`rounded-2xl border px-3 py-3 text-[10px] font-black uppercase tracking-[0.22em] ${
+                      canHeal
+                        ? 'border-[#D0BE8F]/28 bg-[#201A12]/76 text-[#F2E3B5] hover:bg-[#282114]'
+                        : 'border-white/6 bg-white/[0.03] text-white/28 cursor-not-allowed'
+                    }`}
+                  >
+                    {isHealing ? 'Healing' : 'Heal'}
+                  </button>
+                </div>
+              </div>
+              <div className="rounded-[1.5rem] border border-white/10 bg-black/16 p-4">
                 <div className="text-[10px] uppercase tracking-[0.28em] text-white/45">Equipped</div>
                 <div className="mt-4 grid gap-3">
                   <InventoryActionCard
@@ -1667,6 +1750,13 @@ export default function App() {
               >
                 Close
               </button>
+            </div>
+            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+              <HudStat icon={<Users size={14} />} label="Alive" value={playerCount} compact />
+              <HudStat icon={<Skull size={14} />} label="Kills" value={kills} compact />
+              <HudStat icon={<Shield size={14} />} label="HP" value={health} compact />
+              <HudStat icon={<MapIcon size={14} />} label="Zone" value={zonePhase.phase} compact />
+              <HudStat icon={<Navigation size={14} />} label="Time" value={matchElapsedSeconds} compact />
             </div>
             <div className="flex-1 min-h-0">
               <FullMap mapSystem={mapSystem} playerPos={playerPos} zone={zone} pins={pins} onAddPin={handleAddPin} onRemovePin={handleRemovePin} />

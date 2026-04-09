@@ -1,20 +1,38 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Kawakol Battle Royale
 
-# Run and deploy your AI Studio app
+Browser and Android battle royale prototype built with React, Capacitor, and custom real-time game systems.
 
-This contains everything you need to run your app locally.
+## What This Project Does
 
-View your app in AI Studio: https://ai.studio/apps/0889e339-fc1f-4cd2-8e7b-e84d989deb91
+Kawakol Battle Royale is an experimental action game project that combines browser play, mobile packaging, map systems, player movement, offline bots, and multiplayer-oriented game logic.
+
+## Stack
+
+- React
+- TypeScript
+- Vite
+- Capacitor
+- Three.js
+- Socket.IO
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+```bash
+npm install
+npm run dev
+```
 
+## Android Build
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+npm run android:copy
+npm run apk:debug
+```
+
+## Notes
+
+- This repository is now documented as a standalone project instead of an export template
+- Environment variables are configured locally via `.env.example`
+- The project is still an active prototype
+
+Built by Nishant Kumar
