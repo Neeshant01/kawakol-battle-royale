@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Capacitor } from '@capacitor/core';
-import { Crosshair, Map as MapIcon, Navigation, Shield, Skull, Users, Zap } from 'lucide-react';
+import { Backpack, Crosshair, Map as MapIcon, Navigation, Shield, Skull, Users, Zap } from 'lucide-react';
 import characterPortrait from './assets/nikita-vasilkov-1-main.jpg';
 import { GameAudio } from './game/audio';
 import { Engine } from './game/Engine';
@@ -36,6 +36,7 @@ type StarterLoadout = {
 };
 
 const DROP_TARGETS: DropTarget[] = ['Kawakol Market', 'Sokhodeora Dam', 'Echo Point'];
+const ONLINE_MATCH_ENABLED = import.meta.env.VITE_ENABLE_ONLINE_MATCH === 'true';
 
 export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -112,6 +113,27 @@ export default function App() {
 
   useEffect(() => {
     document.title = 'Kawakol Battle Royale';
+  }, []);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousHtmlOverscroll = html.style.overscrollBehavior;
+    const previousBodyOverscroll = body.style.overscrollBehavior;
+
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    html.style.overscrollBehavior = 'none';
+    body.style.overscrollBehavior = 'none';
+
+    return () => {
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      html.style.overscrollBehavior = previousHtmlOverscroll;
+      body.style.overscrollBehavior = previousBodyOverscroll;
+    };
   }, []);
 
   useEffect(() => {
@@ -201,7 +223,7 @@ export default function App() {
       const world = new World(engine);
       const input = new Input();
       const player = new Player(engine, input, world);
-      const socket = new SocketClient();
+      const socket = ONLINE_MATCH_ENABLED ? new SocketClient() : null;
       const offlineBots = new OfflineBotSystem(engine, world);
 
       engineRef.current = engine;
@@ -214,10 +236,11 @@ export default function App() {
       world.updateZone(zone);
       world.updateStreaming(player.mesh.position);
 
-      socket.socket.on('connect', () => setIsConnected(true));
-      socket.socket.on('disconnect', () => setIsConnected(false));
+      if (socket) {
+        socket.socket.on('connect', () => setIsConnected(true));
+        socket.socket.on('disconnect', () => setIsConnected(false));
 
-      socket.onInit = (data) => {
+        socket.onInit = (data) => {
         sessionModeRef.current = 'online';
         setSessionMode('online');
         setPlayerCount(data.players.length);
@@ -242,35 +265,35 @@ export default function App() {
           remote.update(candidate);
           remotePlayersRef.current.set(candidate.id, remote);
         });
-      };
+        };
 
-      socket.onPlayerJoined = (candidate) => {
+        socket.onPlayerJoined = (candidate) => {
         if (candidate.id === socket.id) return;
         const remote = new RemotePlayer(engine, candidate.id, candidate.name);
         remote.update(candidate);
         remotePlayersRef.current.set(candidate.id, remote);
         setPlayerCount((count) => count + 1);
-      };
+        };
 
-      socket.onPlayerMoved = (data) => {
+        socket.onPlayerMoved = (data) => {
         remotePlayersRef.current.get(data.id)?.update(data);
-      };
+        };
 
-      socket.onPlayerLeft = (id) => {
+        socket.onPlayerLeft = (id) => {
         const remote = remotePlayersRef.current.get(id);
         if (!remote) return;
         remote.destroy();
         remotePlayersRef.current.delete(id);
         setPlayerCount((count) => Math.max(0, count - 1));
-      };
+        };
 
-      socket.onPlayerHit = (data) => {
+        socket.onPlayerHit = (data) => {
         if (data.id !== socket.id) return;
         setHealth(data.health);
         player.health = data.health;
-      };
+        };
 
-      socket.onPlayerKilled = (data) => {
+        socket.onPlayerKilled = (data) => {
         if (data.victimId === socket.id) {
           setGameState('dead');
           player.state = 'dead';
@@ -282,24 +305,24 @@ export default function App() {
           player.kills += 1;
           audioRef.current?.play('pickup');
         }
-      };
+        };
 
-      socket.onLootPickedUp = (data) => {
+        socket.onLootPickedUp = (data) => {
         if (data.playerId === socket.id) {
           applyLootPickup(data.itemType);
         }
         lootRef.current = lootRef.current.filter((item) => item.id !== data.lootId);
         world.updateLoot(lootRef.current);
-      };
+        };
 
-      socket.onZoneUpdate = (nextZone) => {
+        socket.onZoneUpdate = (nextZone) => {
         setZone(nextZone);
         world.updateZone(nextZone);
-      };
+        };
 
-      socket.onMatchStarting = (timer) => setMatchTimer(timer);
+        socket.onMatchStarting = (timer) => setMatchTimer(timer);
 
-      socket.onMatchStarted = (data) => {
+        socket.onMatchStarted = (data) => {
         sessionModeRef.current = 'online';
         setSessionMode('online');
         setGameState('playing');
@@ -313,9 +336,9 @@ export default function App() {
         lootRef.current = data.loot;
         const me = data.players.find((candidate: any) => candidate.id === socket.id);
         if (me) player.mesh.position.set(me.x, me.y, me.z);
-      };
+        };
 
-      socket.onVoiceSignal = async ({ senderId, signal }) => {
+        socket.onVoiceSignal = async ({ senderId, signal }) => {
         let peer = peersRef.current.get(senderId);
         if (signal.type === 'offer') {
           if (!peer) peer = createPeer(senderId);
@@ -328,7 +351,10 @@ export default function App() {
         } else if (signal.candidate && peer) {
           await peer.addIceCandidate(new RTCIceCandidate(signal.candidate));
         }
-      };
+        };
+      } else {
+        setIsConnected(false);
+      }
 
       let lastUiUpdate = 0;
       const animate = () => {
@@ -384,7 +410,7 @@ export default function App() {
             sessionModeRef.current === 'online' &&
             (!(animate as unknown as { lastMove?: number }).lastMove || now - (animate as unknown as { lastMove?: number }).lastMove! > 50)
           ) {
-            socket.move(player.getPosition());
+            socket?.move(player.getPosition());
             (animate as unknown as { lastMove?: number }).lastMove = now;
           }
 
@@ -420,7 +446,9 @@ export default function App() {
       };
       window.addEventListener('keydown', handleKeyDown);
 
-      initVoice();
+      if (socket) {
+        initVoice();
+      }
 
       return () => {
         window.removeEventListener('keydown', handleKeyDown);
@@ -436,7 +464,7 @@ export default function App() {
         if (countdownTimerRef.current !== null) {
           window.clearInterval(countdownTimerRef.current);
         }
-        socket.socket.disconnect();
+        socket?.socket.disconnect();
         remotePlayersRef.current.forEach((remote) => remote.destroy());
         remotePlayersRef.current.clear();
         offlineBots.destroy();
@@ -481,7 +509,7 @@ export default function App() {
   const isUltraCompactLandscape = viewport.width > viewport.height && viewport.height <= 430;
   const isSmallViewport = Math.min(viewport.width, viewport.height) <= 640;
   const showMovementGrid = !isCompactLandscape;
-  const minimapSize = isUltraCompactLandscape ? 110 : isCompactLandscape ? 124 : isSmallViewport ? 176 : 220;
+  const minimapSize = isUltraCompactLandscape ? 92 : isCompactLandscape ? 108 : isSmallViewport ? 164 : 208;
   const activeWeaponState = weaponSlots[activeWeaponSlot];
   const activeWeaponStats = activeWeaponState.type ? WEAPON_CATALOG[activeWeaponState.type] : null;
   const otherWeaponSlot: WeaponSlotKey = activeWeaponSlot === 'primary' ? 'secondary' : 'primary';
@@ -497,7 +525,6 @@ export default function App() {
   const canFire = gameState === 'playing' && !!activeWeaponState.type && activeWeaponState.mag > 0 && !isReloading && !isHealing;
   const matchElapsedSeconds = matchStartTime ? Math.max(0, Math.floor((hudNow - matchStartTime) / 1000)) : 0;
   const spawnProtectionRemaining = Math.max(0, Math.ceil((spawnProtectionUntilRef.current - hudNow) / 1000));
-
   const currentLocation = useMemo(() => {
     const world = worldRef.current;
     if (!world) return 'Initializing tactical map';
@@ -916,7 +943,7 @@ export default function App() {
   };
 
   const handleJoin = () => {
-    if (!socketRef.current || !isConnected) return;
+    if (!ONLINE_MATCH_ENABLED || !socketRef.current || !isConnected) return;
     if (offlineZoneTimerRef.current !== null) {
       window.clearInterval(offlineZoneTimerRef.current);
       offlineZoneTimerRef.current = null;
@@ -1129,38 +1156,29 @@ export default function App() {
                   </div>
                 ) : (
                   <>
-                    {!isConnected ? (
-                      <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 px-5 py-4 text-white/70">
-                        {isNativePlatform
-                          ? 'Mobile build can launch offline immediately. Online mode needs a reachable socket server URL.'
-                          : 'Match server not connected yet. You can still launch the offline tactical slice.'}
-                      </div>
-                    ) : null}
+                    <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 px-5 py-4 text-white/70">
+                      {ONLINE_MATCH_ENABLED
+                        ? isNativePlatform
+                          ? 'Mobile build can launch offline immediately. Online matchmaking needs a reachable socket server URL.'
+                          : 'Browser build is ready. You can launch straight into the tactical match.'
+                        : 'GitHub-hosted build launches straight into the browser match. Online matchmaking is disabled in this version.'}
+                    </div>
                     <input
                       type="text"
                       value={playerName}
                       onChange={(event) => setPlayerName(event.target.value)}
-                      onKeyDown={(event) => event.key === 'Enter' && handleJoin()}
+                      onKeyDown={(event) => event.key === 'Enter' && startOfflineMatch()}
                       placeholder="Enter player name"
                       className="mt-6 w-full rounded-2xl border border-white/10 bg-black/20 px-5 py-4 text-lg font-semibold outline-none focus:border-[#D0BE8F]/40"
                     />
-                    <div className={`mt-4 grid gap-3 ${isCompactLandscape ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                    <div className="mt-4">
                       <button
                         type="button"
-                        aria-label={isConnected ? 'Join online match' : 'Online match unavailable while server is disconnected'}
-                        onClick={handleJoin}
-                        disabled={!isConnected || gameState === 'joining'}
-                        className="w-full rounded-2xl bg-[#D1B46E] px-5 py-4 text-[#14100A] font-black uppercase tracking-[0.2em] hover:bg-[#DEC37E] transition-colors disabled:opacity-50 disabled:saturate-0 disabled:cursor-not-allowed"
-                      >
-                        {isConnected ? 'Online Match' : 'Server Offline'}
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Start offline match"
+                        aria-label="Start browser match"
                         onClick={startOfflineMatch}
-                        className="w-full rounded-2xl border border-[#D0BE8F]/28 bg-[#1A1E1A] px-5 py-4 text-[#F2E3B5] font-black uppercase tracking-[0.2em] hover:bg-[#222820] transition-colors"
+                        className="w-full rounded-2xl bg-[#D1B46E] px-5 py-4 text-[#14100A] font-black uppercase tracking-[0.2em] hover:bg-[#DEC37E] transition-colors"
                       >
-                        Play Offline
+                        Play On Web
                       </button>
                     </div>
                   </>
@@ -1180,8 +1198,8 @@ export default function App() {
                 </div>
 
                 <div className="mt-6 flex items-center justify-between text-xs uppercase tracking-[0.28em] text-white/45">
-                  <span>{sessionMode === 'offline' ? 'offline ready' : `${playerCount} connected`}</span>
-                  <span>mobile battle test</span>
+                  <span>{ONLINE_MATCH_ENABLED ? (sessionMode === 'offline' ? 'browser ready' : `${playerCount} connected`) : 'github pages ready'}</span>
+                  <span>web battle build</span>
                 </div>
               </div>
 
@@ -1454,7 +1472,7 @@ export default function App() {
                 isUltraCompactLandscape ? 'w-9 h-9' : isCompactLandscape ? 'w-11 h-11' : 'w-14 h-14'
               }`}
             >
-              <Shield size={isUltraCompactLandscape ? 13 : isCompactLandscape ? 15 : 20} />
+              <Backpack size={isUltraCompactLandscape ? 13 : isCompactLandscape ? 15 : 20} />
             </button>
             {nearbyLoot ? (
               <button
