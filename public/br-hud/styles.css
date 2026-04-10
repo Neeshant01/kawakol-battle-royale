@@ -360,11 +360,54 @@ button {
   place-items: center;
 }
 
+.game-ui__icon-button--fullscreen {
+  position: relative;
+  width: 3.2rem;
+  border-radius: 1rem;
+  padding: 0;
+}
+
 .game-ui__icon-bar {
   width: 1.1rem;
   height: 0.12rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.82);
+}
+
+.game-ui__fullscreen-corner {
+  position: absolute;
+  width: 0.72rem;
+  height: 0.72rem;
+  border-color: rgba(255, 255, 255, 0.86);
+  border-style: solid;
+}
+
+.game-ui__fullscreen-corner--tl {
+  top: 0.6rem;
+  left: 0.6rem;
+  border-width: 0.12rem 0 0 0.12rem;
+  border-top-left-radius: 0.2rem;
+}
+
+.game-ui__fullscreen-corner--tr {
+  top: 0.6rem;
+  right: 0.6rem;
+  border-width: 0.12rem 0.12rem 0 0;
+  border-top-right-radius: 0.2rem;
+}
+
+.game-ui__fullscreen-corner--bl {
+  bottom: 0.6rem;
+  left: 0.6rem;
+  border-width: 0 0 0.12rem 0.12rem;
+  border-bottom-left-radius: 0.2rem;
+}
+
+.game-ui__fullscreen-corner--br {
+  right: 0.6rem;
+  bottom: 0.6rem;
+  border-width: 0 0.12rem 0.12rem 0;
+  border-bottom-right-radius: 0.2rem;
 }
 
 .game-ui__utility-stack,

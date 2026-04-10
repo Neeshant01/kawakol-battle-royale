@@ -13,6 +13,7 @@ const sprintButton = document.getElementById("sprint-button");
 const medkitButton = document.getElementById("medkit-button");
 const inventoryButton = document.getElementById("inventory-button");
 const settingsButton = document.getElementById("settings-button");
+const fullscreenButton = document.getElementById("fullscreen-button");
 
 const state = {
   timerSeconds: 165,
@@ -84,12 +85,11 @@ function renderWeapons() {
     button.type = "button";
     button.className = `game-ui__weapon-slot${isActive ? " game-ui__weapon-slot--active" : ""}`;
     button.setAttribute("aria-label", `Switch to ${weapon.name}`);
-
     button.innerHTML = `
       <span class="game-ui__weapon-index">${index + 1}</span>
       <span>
         <span class="game-ui__weapon-name">${weapon.name}</span>
-        <span class="game-ui__weapon-meta">${weapon.mode} • ${weapon.caliber}</span>
+        <span class="game-ui__weapon-meta">${weapon.mode} | ${weapon.caliber}</span>
       </span>
       <span class="game-ui__weapon-ammo">
         <strong>${weapon.ammo}</strong>
@@ -111,9 +111,7 @@ function renderJoystick() {
   const thumbTravel = joystickBase.clientWidth * 0.24;
   joystickThumb.style.transform = `translate(calc(-50% + ${state.joystick.x * thumbTravel}px), calc(-50% + ${-state.joystick.y * thumbTravel}px))`;
   joystickValues.textContent = `X ${state.joystick.x.toFixed(2)} / Y ${state.joystick.y.toFixed(2)}`;
-
-  const rotation = state.joystick.x * 28;
-  playerMarker.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+  playerMarker.style.transform = `translate(-50%, -50%) rotate(${state.joystick.x * 28}deg)`;
 }
 
 function setJoystickPosition(clientX, clientY) {
@@ -121,7 +119,6 @@ function setJoystickPosition(clientX, clientY) {
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
   const radius = rect.width * 0.32;
-
   const dx = clientX - centerX;
   const dy = clientY - centerY;
   const distance = Math.hypot(dx, dy);
@@ -129,7 +126,6 @@ function setJoystickPosition(clientX, clientY) {
 
   state.joystick.x = clamp((dx * ratio) / radius, -1, 1);
   state.joystick.y = clamp((-dy * ratio) / radius, -1, 1);
-
   renderJoystick();
 }
 
@@ -166,10 +162,9 @@ joystickBase.addEventListener("pointerup", (event) => {
 
 joystickBase.addEventListener("pointercancel", resetJoystick);
 joystickBase.addEventListener("pointerleave", () => {
-  if (!state.joystick.active) {
-    return;
+  if (state.joystick.active) {
+    resetJoystick();
   }
-  resetJoystick();
 });
 
 document.querySelectorAll("[data-action]").forEach((button) => {
@@ -217,6 +212,36 @@ settingsButton.addEventListener("click", () => {
   logAction("Settings opened.");
 });
 
+async function toggleFullscreen() {
+  try {
+    if (!document.fullscreenElement) {
+      await document.documentElement.requestFullscreen();
+      if (screen.orientation && typeof screen.orientation.lock === "function") {
+        try {
+          await screen.orientation.lock("landscape");
+        } catch {
+          // Orientation lock is optional.
+        }
+      }
+      logAction("Fullscreen enabled.");
+    } else {
+      await document.exitFullscreen();
+      logAction("Fullscreen disabled.");
+    }
+  } catch {
+    logAction("Fullscreen request blocked by browser.");
+  }
+}
+
+function syncFullscreenState() {
+  const isFullscreen = Boolean(document.fullscreenElement);
+  fullscreenButton.setAttribute("aria-label", isFullscreen ? "Exit fullscreen" : "Enter fullscreen");
+  fullscreenButton.classList.toggle("game-ui__circle-button--active", isFullscreen);
+}
+
+fullscreenButton.addEventListener("click", toggleFullscreen);
+document.addEventListener("fullscreenchange", syncFullscreenState);
+
 window.addEventListener("keydown", (event) => {
   if (event.key >= "1" && event.key <= "4") {
     state.activeWeaponIndex = Number(event.key) - 1;
@@ -239,3 +264,4 @@ renderWeapons();
 renderVitals();
 renderMatchStats();
 renderJoystick();
+syncFullscreenState();
