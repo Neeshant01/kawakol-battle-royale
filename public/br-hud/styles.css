@@ -1,0 +1,709 @@
+:root {
+  --ui-bg: rgba(11, 18, 27, 0.58);
+  --ui-bg-strong: rgba(12, 20, 30, 0.74);
+  --ui-border: rgba(255, 255, 255, 0.14);
+  --ui-highlight: rgba(224, 198, 129, 0.88);
+  --ui-soft: rgba(255, 255, 255, 0.72);
+  --ui-muted: rgba(255, 255, 255, 0.48);
+  --ui-shadow: 0 20px 48px rgba(0, 0, 0, 0.32);
+  --ui-radius: 1.25rem;
+  --ui-blur: blur(18px);
+  --ui-transition: 180ms ease;
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: Inter, "Segoe UI", sans-serif;
+  color: #fff;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(87, 132, 73, 0.46), transparent 28%),
+    radial-gradient(circle at 78% 24%, rgba(126, 96, 54, 0.38), transparent 24%),
+    linear-gradient(140deg, #16232c 0%, #0b1118 55%, #05080c 100%);
+}
+
+body {
+  touch-action: manipulation;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.game-ui {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  padding:
+    calc(0.75rem + var(--safe-area-top))
+    calc(0.75rem + var(--safe-area-right))
+    calc(0.75rem + var(--safe-area-bottom))
+    calc(0.75rem + var(--safe-area-left));
+}
+
+.game-ui__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(4, 8, 14, 0.18), rgba(4, 8, 14, 0.08) 35%, rgba(4, 8, 14, 0.18)),
+    radial-gradient(circle at center, transparent 0%, transparent 45%, rgba(0, 0, 0, 0.08) 100%);
+  pointer-events: none;
+}
+
+.game-ui__zone {
+  position: absolute;
+  z-index: 2;
+}
+
+.game-ui__zone--top-left {
+  top: calc(0.75rem + var(--safe-area-top));
+  left: calc(0.75rem + var(--safe-area-left));
+}
+
+.game-ui__zone--top-center {
+  top: calc(0.75rem + var(--safe-area-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(52vw, 32rem);
+}
+
+.game-ui__zone--top-right {
+  top: calc(0.75rem + var(--safe-area-top));
+  right: calc(0.75rem + var(--safe-area-right));
+}
+
+.game-ui__zone--middle-left {
+  top: 50%;
+  left: calc(0.75rem + var(--safe-area-left));
+  transform: translateY(-50%);
+}
+
+.game-ui__zone--middle-right {
+  top: 50%;
+  right: calc(0.75rem + var(--safe-area-right));
+  transform: translateY(-50%);
+}
+
+.game-ui__zone--bottom-left {
+  bottom: calc(0.75rem + var(--safe-area-bottom));
+  left: calc(0.75rem + var(--safe-area-left));
+}
+
+.game-ui__zone--bottom-center {
+  bottom: calc(0.75rem + var(--safe-area-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(38vw, 24rem);
+}
+
+.game-ui__zone--bottom-right {
+  bottom: calc(0.75rem + var(--safe-area-bottom));
+  right: calc(0.75rem + var(--safe-area-right));
+}
+
+.game-ui__panel {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  background: var(--ui-bg);
+  backdrop-filter: var(--ui-blur);
+  -webkit-backdrop-filter: var(--ui-blur);
+  box-shadow: var(--ui-shadow);
+}
+
+.game-ui__panel--minimap {
+  width: min(23vw, 11rem);
+  padding: 0.65rem;
+}
+
+.game-ui__panel--top-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.9rem;
+}
+
+.game-ui__panel--status,
+.game-ui__panel--log,
+.game-ui__panel--vitals,
+.game-ui__panel--joystick,
+.game-ui__panel--weapons {
+  padding: 0.8rem;
+}
+
+.game-ui__panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.game-ui__label {
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+}
+
+.game-ui__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.6rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.game-ui__chip--soft {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ui-soft);
+}
+
+.game-ui__chip--accent {
+  background: rgba(224, 198, 129, 0.2);
+  color: rgba(255, 233, 180, 0.96);
+}
+
+.game-ui__minimap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 35% 35%, rgba(126, 175, 103, 0.36), transparent 22%),
+    radial-gradient(circle at 65% 62%, rgba(145, 112, 71, 0.26), transparent 18%),
+    linear-gradient(140deg, rgba(50, 84, 58, 0.94), rgba(24, 39, 29, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.game-ui__minimap-grid,
+.game-ui__minimap-ring,
+.game-ui__minimap-path {
+  position: absolute;
+  inset: 0;
+}
+
+.game-ui__minimap-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 18% 18%;
+}
+
+.game-ui__minimap-ring::before {
+  content: "";
+  position: absolute;
+  inset: 16%;
+  border: 2px solid rgba(255, 238, 187, 0.42);
+  border-radius: 50%;
+}
+
+.game-ui__minimap-path--main::before,
+.game-ui__minimap-path--side::before {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(212, 191, 144, 0.72);
+}
+
+.game-ui__minimap-path--main::before {
+  width: 74%;
+  height: 0.22rem;
+  top: 46%;
+  left: 13%;
+  transform: rotate(-28deg);
+}
+
+.game-ui__minimap-path--side::before {
+  width: 42%;
+  height: 0.16rem;
+  top: 58%;
+  left: 42%;
+  transform: rotate(74deg);
+}
+
+.game-ui__player-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1rem;
+  height: 1rem;
+  transform: translate(-50%, -50%) rotate(16deg);
+}
+
+.game-ui__player-marker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(50% 0%, 100% 100%, 50% 72%, 0% 100%);
+  background: linear-gradient(180deg, #fafcff, #b8ccff);
+  box-shadow: 0 0 0.55rem rgba(182, 205, 255, 0.68);
+}
+
+.game-ui__minimap-marker {
+  position: absolute;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+}
+
+.game-ui__minimap-marker--enemy {
+  background: #ff7965;
+  box-shadow: 0 0 0.45rem rgba(255, 121, 101, 0.8);
+}
+
+.game-ui__compass {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.game-ui__compass-mark {
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+}
+
+.game-ui__compass-mark--active {
+  color: #fff0c2;
+}
+
+.game-ui__timer-box {
+  display: grid;
+  gap: 0.12rem;
+  justify-items: end;
+}
+
+.game-ui__timer-value,
+.game-ui__stat-value {
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.game-ui__stat-value--small {
+  font-size: clamp(0.85rem, 1.45vw, 1.05rem);
+}
+
+.game-ui__status-stack {
+  display: flex;
+  align-items: stretch;
+  gap: 0.55rem;
+}
+
+.game-ui__panel--status {
+  min-width: 4.5rem;
+  text-align: center;
+}
+
+.game-ui__icon-button,
+.game-ui__circle-button {
+  border: 1px solid var(--ui-border);
+  background: var(--ui-bg-strong);
+  backdrop-filter: var(--ui-blur);
+  -webkit-backdrop-filter: var(--ui-blur);
+  box-shadow: var(--ui-shadow);
+  transition:
+    transform var(--ui-transition),
+    background var(--ui-transition),
+    border-color var(--ui-transition),
+    box-shadow var(--ui-transition);
+  cursor: pointer;
+}
+
+.game-ui__icon-button:hover,
+.game-ui__circle-button:hover,
+.game-ui__icon-button:focus-visible,
+.game-ui__circle-button:focus-visible {
+  transform: translateY(-1px) scale(1.02);
+  border-color: rgba(255, 224, 150, 0.42);
+  outline: none;
+}
+
+.game-ui__icon-button:active,
+.game-ui__circle-button:active,
+.game-ui__circle-button--active {
+  transform: scale(0.96);
+}
+
+.game-ui__icon-button--settings {
+  width: 3.2rem;
+  border-radius: 1rem;
+  padding: 0.7rem 0.65rem;
+  display: grid;
+  gap: 0.28rem;
+  place-items: center;
+}
+
+.game-ui__icon-bar {
+  width: 1.1rem;
+  height: 0.12rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.game-ui__utility-stack,
+.game-ui__action-cluster {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.game-ui__utility-stack {
+  justify-items: start;
+}
+
+.game-ui__circle-button {
+  width: clamp(3.4rem, 8vw, 4.6rem);
+  height: clamp(3.4rem, 8vw, 4.6rem);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.game-ui__circle-button--fire {
+  width: clamp(4.75rem, 11vw, 6rem);
+  height: clamp(4.75rem, 11vw, 6rem);
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 180, 132, 0.36), transparent 40%),
+    linear-gradient(180deg, rgba(201, 93, 72, 0.88), rgba(128, 37, 30, 0.88));
+}
+
+.game-ui__button-text {
+  font-size: clamp(0.7rem, 1.45vw, 0.9rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.game-ui__panel--log {
+  width: min(18rem, 28vw);
+  min-height: 7.5rem;
+}
+
+.game-ui__log-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.game-ui__log-item {
+  font-size: 0.74rem;
+  color: var(--ui-soft);
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.game-ui__panel--weapons {
+  width: min(25rem, 34vw);
+}
+
+.game-ui__weapon-slots {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.game-ui__weapon-slot {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem 0.9rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.game-ui__weapon-slot--active {
+  border-color: rgba(255, 223, 150, 0.44);
+  background: rgba(224, 198, 129, 0.14);
+}
+
+.game-ui__weapon-index {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.game-ui__weapon-name {
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.game-ui__weapon-meta {
+  font-size: 0.66rem;
+  color: var(--ui-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.game-ui__weapon-ammo {
+  display: grid;
+  justify-items: end;
+  gap: 0.1rem;
+}
+
+.game-ui__weapon-ammo strong {
+  font-size: 0.9rem;
+}
+
+.game-ui__panel--joystick {
+  width: min(19rem, 27vw);
+}
+
+.game-ui__joystick-base {
+  position: relative;
+  width: min(30vw, 8.5rem);
+  aspect-ratio: 1;
+  margin-top: 0.4rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  touch-action: none;
+}
+
+.game-ui__joystick-ring {
+  position: absolute;
+  inset: 14%;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+}
+
+.game-ui__joystick-thumb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08) 70%),
+    rgba(17, 29, 40, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.24);
+  transition: transform 80ms linear;
+}
+
+.game-ui__panel--vitals {
+  width: 100%;
+}
+
+.game-ui__health-track {
+  width: 100%;
+  height: 0.9rem;
+  margin-top: 0.25rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.game-ui__health-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff7461 0%, #ffb55b 45%, #dce87a 100%);
+  transition: width 220ms ease;
+}
+
+.game-ui__armor-row {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+}
+
+.game-ui__armor-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.game-ui__armor-icon--active {
+  background: linear-gradient(180deg, rgba(167, 211, 255, 0.82), rgba(79, 118, 197, 0.82));
+  border-color: rgba(196, 230, 255, 0.5);
+}
+
+.game-ui__action-cluster {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  justify-items: end;
+}
+
+.game-ui__circle-button--action:nth-child(1) {
+  grid-row: span 2;
+}
+
+.game-ui__crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2rem;
+  height: 2rem;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.game-ui__crosshair-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0.4rem rgba(255, 255, 255, 0.35);
+}
+
+.game-ui__crosshair-line--top,
+.game-ui__crosshair-line--bottom {
+  left: 50%;
+  width: 0.12rem;
+  height: 0.5rem;
+  transform: translateX(-50%);
+}
+
+.game-ui__crosshair-line--top {
+  top: 0;
+}
+
+.game-ui__crosshair-line--bottom {
+  bottom: 0;
+}
+
+.game-ui__crosshair-line--left,
+.game-ui__crosshair-line--right {
+  top: 50%;
+  width: 0.5rem;
+  height: 0.12rem;
+  transform: translateY(-50%);
+}
+
+.game-ui__crosshair-line--left {
+  left: 0;
+}
+
+.game-ui__crosshair-line--right {
+  right: 0;
+}
+
+.game-ui__crosshair-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: rgba(255, 245, 200, 0.92);
+  transform: translate(-50%, -50%);
+}
+
+@media (max-width: 960px) {
+  .game-ui {
+    padding:
+      calc(0.55rem + var(--safe-area-top))
+      calc(0.55rem + var(--safe-area-right))
+      calc(0.55rem + var(--safe-area-bottom))
+      calc(0.55rem + var(--safe-area-left));
+  }
+
+  .game-ui__zone--top-center {
+    width: min(58vw, 28rem);
+  }
+
+  .game-ui__panel--weapons {
+    width: min(18rem, 31vw);
+  }
+
+  .game-ui__panel--log {
+    width: min(12rem, 21vw);
+  }
+}
+
+@media (max-width: 760px) and (orientation: landscape) {
+  .game-ui__zone--middle-left,
+  .game-ui__zone--middle-right {
+    top: 48%;
+  }
+
+  .game-ui__panel--weapons,
+  .game-ui__panel--log,
+  .game-ui__panel--joystick {
+    padding: 0.65rem;
+  }
+
+  .game-ui__panel--weapons {
+    width: min(16rem, 33vw);
+  }
+
+  .game-ui__panel--log {
+    width: min(10.75rem, 21vw);
+  }
+
+  .game-ui__panel--minimap {
+    width: min(22vw, 8.25rem);
+  }
+
+  .game-ui__zone--bottom-center {
+    width: min(34vw, 16rem);
+  }
+
+  .game-ui__circle-button {
+    width: 3.15rem;
+    height: 3.15rem;
+  }
+
+  .game-ui__circle-button--fire {
+    width: 4.3rem;
+    height: 4.3rem;
+  }
+}
+
+@media (max-width: 720px) and (orientation: portrait) {
+  body::before {
+    content: "Rotate to landscape for the mobile battle royale HUD";
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background: rgba(4, 8, 12, 0.92);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    z-index: 100;
+  }
+}

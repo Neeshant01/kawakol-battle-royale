@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Kawakol Battle Royale HUD</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="game-ui-container" class="game-ui">
+      <div class="game-ui__backdrop"></div>
+
+      <section class="game-ui__zone game-ui__zone--top-left" aria-label="Minimap">
+        <div class="game-ui__panel game-ui__panel--minimap">
+          <div class="game-ui__panel-header">
+            <span class="game-ui__label">Minimap</span>
+            <span class="game-ui__chip game-ui__chip--soft">Kawakol</span>
+          </div>
+          <div class="game-ui__minimap" aria-hidden="true">
+            <div class="game-ui__minimap-grid"></div>
+            <div class="game-ui__minimap-ring"></div>
+            <div class="game-ui__minimap-path game-ui__minimap-path--main"></div>
+            <div class="game-ui__minimap-path game-ui__minimap-path--side"></div>
+            <span class="game-ui__minimap-marker game-ui__minimap-marker--enemy" style="top: 28%; left: 72%"></span>
+            <span class="game-ui__minimap-marker game-ui__minimap-marker--enemy" style="top: 64%; left: 20%"></span>
+            <span class="game-ui__minimap-marker game-ui__minimap-marker--enemy" style="top: 74%; left: 76%"></span>
+            <div id="player-marker" class="game-ui__player-marker"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-ui__zone game-ui__zone--top-center" aria-label="Compass and safe zone">
+        <div class="game-ui__panel game-ui__panel--top-bar">
+          <div class="game-ui__compass" aria-label="Compass">
+            <span class="game-ui__compass-mark">NW</span>
+            <span class="game-ui__compass-mark">330</span>
+            <span class="game-ui__compass-mark">N</span>
+            <span class="game-ui__compass-mark game-ui__compass-mark--active">15</span>
+            <span class="game-ui__compass-mark">NE</span>
+            <span class="game-ui__compass-mark">60</span>
+            <span class="game-ui__compass-mark">E</span>
+          </div>
+          <div class="game-ui__timer-box">
+            <span class="game-ui__label">Safe Zone</span>
+            <strong id="safe-zone-timer" class="game-ui__timer-value">02:45</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-ui__zone game-ui__zone--top-right" aria-label="Match status">
+        <div class="game-ui__status-stack">
+          <div class="game-ui__panel game-ui__panel--status">
+            <span class="game-ui__label">Alive</span>
+            <strong id="alive-count" class="game-ui__stat-value">47</strong>
+          </div>
+          <div class="game-ui__panel game-ui__panel--status">
+            <span class="game-ui__label">Kills</span>
+            <strong id="kill-count" class="game-ui__stat-value">3</strong>
+          </div>
+          <button id="settings-button" class="game-ui__icon-button game-ui__icon-button--settings" type="button" aria-label="Open settings">
+            <span class="game-ui__icon-bar"></span>
+            <span class="game-ui__icon-bar"></span>
+            <span class="game-ui__icon-bar"></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="game-ui__zone game-ui__zone--middle-left" aria-label="Utility controls">
+        <div class="game-ui__utility-stack">
+          <button id="inventory-button" class="game-ui__circle-button game-ui__circle-button--utility" type="button" aria-label="Open inventory">
+            <span class="game-ui__button-text">Bag</span>
+          </button>
+          <button id="medkit-button" class="game-ui__circle-button game-ui__circle-button--utility" type="button" aria-label="Use medkit">
+            <span class="game-ui__button-text">Med</span>
+          </button>
+          <button id="sprint-button" class="game-ui__circle-button game-ui__circle-button--utility" type="button" aria-label="Toggle sprint">
+            <span class="game-ui__button-text">Run</span>
+          </button>
+          <div class="game-ui__panel game-ui__panel--log" aria-live="polite">
+            <div class="game-ui__panel-header">
+              <span class="game-ui__label">Action Log</span>
+            </div>
+            <ul id="action-log" class="game-ui__log-list">
+              <li class="game-ui__log-item">HUD ready.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-ui__zone game-ui__zone--middle-right" aria-label="Weapon loadout">
+        <div class="game-ui__panel game-ui__panel--weapons">
+          <div class="game-ui__panel-header">
+            <span class="game-ui__label">Weapon Loadout</span>
+            <span class="game-ui__chip game-ui__chip--accent">Tap to Switch</span>
+          </div>
+          <div id="weapon-slots" class="game-ui__weapon-slots"></div>
+        </div>
+      </section>
+
+      <section class="game-ui__zone game-ui__zone--bottom-left" aria-label="Virtual joystick">
+        <div class="game-ui__panel game-ui__panel--joystick">
+          <div class="game-ui__panel-header">
+            <span class="game-ui__label">Movement</span>
+            <span id="joystick-values" class="game-ui__chip game-ui__chip--soft">X 0.00 / Y 0.00</span>
+          </div>
+          <div id="joystick-base" class="game-ui__joystick-base">
+            <div class="game-ui__joystick-ring"></div>
+            <div id="joystick-thumb" class="game-ui__joystick-thumb"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-ui__zone game-ui__zone--bottom-center" aria-label="Health and armor">
+        <div class="game-ui__panel game-ui__panel--vitals">
+          <div class="game-ui__panel-header">
+            <span class="game-ui__label">HP</span>
+            <strong id="hp-value" class="game-ui__stat-value game-ui__stat-value--small">200 / 200</strong>
+          </div>
+          <div class="game-ui__health-track">
+            <div id="hp-fill" class="game-ui__health-fill"></div>
+          </div>
+          <div class="game-ui__armor-row" aria-label="Armor status">
+            <span class="game-ui__armor-icon game-ui__armor-icon--active"></span>
+            <span class="game-ui__armor-icon game-ui__armor-icon--active"></span>
+            <span class="game-ui__armor-icon game-ui__armor-icon--active"></span>
+            <span class="game-ui__armor-icon"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="game-ui__zone game-ui__zone--bottom-right" aria-label="Action controls">
+        <div class="game-ui__action-cluster">
+          <button class="game-ui__circle-button game-ui__circle-button--action game-ui__circle-button--fire" type="button" data-action="Fire" aria-label="Fire weapon">
+            <span class="game-ui__button-text">Fire</span>
+          </button>
+          <button class="game-ui__circle-button game-ui__circle-button--action" type="button" data-action="Aim" aria-label="Aim down sights">
+            <span class="game-ui__button-text">Aim</span>
+          </button>
+          <button class="game-ui__circle-button game-ui__circle-button--action" type="button" data-action="Jump" aria-label="Jump">
+            <span class="game-ui__button-text">Jump</span>
+          </button>
+          <button class="game-ui__circle-button game-ui__circle-button--action" type="button" data-action="Crouch" aria-label="Crouch">
+            <span class="game-ui__button-text">Crouch</span>
+          </button>
+          <button class="game-ui__circle-button game-ui__circle-button--action" type="button" data-action="Prone" aria-label="Go prone">
+            <span class="game-ui__button-text">Prone</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="game-ui__crosshair" aria-hidden="true">
+        <span class="game-ui__crosshair-line game-ui__crosshair-line--top"></span>
+        <span class="game-ui__crosshair-line game-ui__crosshair-line--right"></span>
+        <span class="game-ui__crosshair-line game-ui__crosshair-line--bottom"></span>
+        <span class="game-ui__crosshair-line game-ui__crosshair-line--left"></span>
+        <span class="game-ui__crosshair-core"></span>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
